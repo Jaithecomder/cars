@@ -5,47 +5,62 @@ import { createLight, moveLight } from './lighting';
 import { createPlane } from './plane';
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-const topcamera = new THREE.OrthographicCamera()
+const aspect = window.innerWidth / window.innerHeight;
+var minimWidth = window.innerHeight / 4;
+var minimHeight = window.innerHeight / 4;
+const camera = new THREE.PerspectiveCamera( 75, aspect, 0.1, 1000 );
+const topcamera = new THREE.OrthographicCamera(- minimWidth / 2, minimWidth / 2, minimHeight / 2, - minimHeight / 2, 1, 1000);
+
+scene.add(camera);
+scene.add(topcamera);
 
 const renderer = new THREE.WebGLRenderer(); 
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.outputEncoding = THREE.sRGBEncoding;
 document.body.appendChild( renderer.domElement );
 
-camera.position.z = 8;
-
-const car = createCube(4, 2, 9);
-scene.add(car);
-car.rotation.y += Math.PI;
-car.position.y = 1;
-car.position.z = 5;
-var yRot = 0;
-
 const sun = createLight(10, 100, 100, 100);
 const grnd = createPlane(1000, 1000);
-const lwall = createCube(0.5, 2, 10);
+grnd.position.y = 0;
+const lwall = createCube(0.5, 1, 10);
 lwall.position.x = -5;
 lwall.position.y = 1;
-const rwall = createCube(0.5, 2, 10);
+const rwall = createCube(0.5, 1, 10);
 rwall.position.x = 5;
 rwall.position.y = 1;
 
+function dumpObject(obj, lines = [], isLast = true, prefix = '') {
+	const localPrefix = isLast ? '└─' : '├─';
+	lines.push(`${prefix}${prefix ? localPrefix : ''}${obj.name || '*no-name*'} [${obj.type}]`);
+	const newPrefix = prefix + (isLast ? '  ' : '│ ');
+	const lastNdx = obj.children.length - 1;
+	obj.children.forEach((child, ndx) => {
+	  const isLast = ndx === lastNdx;
+	  dumpObject(child, lines, isLast, newPrefix);
+	});
+	return lines;
+  }
+
 const loader = new GLTFLoader();
 
-// loader.load( '../resources/car/scene.gltf', function ( gltf ) {
+const gltf = await loader.loadAsync('../resources/car1/scene.gltf');
+const car = gltf.scene;
+console.log(dumpObject(car).join('\n'));
+car.rotation.y = Math.PI;
+scene.add(car);
 
-// 	car = gltf.scene;
-// 	car.rotation.y += Math.PI;
-// 	scene.add(car);
+var yRot = 0;
 
-// }, undefined, function ( error ) {
+const carBox = new THREE.Box3().setFromObject(car);
+const bsize = new THREE.Vector3();
+carBox.getSize(bsize);
 
-// 	console.error(error);
+var center = new THREE.Vector3();
+carBox.getCenter(center);
+console.log(center);
+car.position.sub(center);
 
-// } );
-
-var carBox = new THREE.Box3().setFromObject(car);
+car.position.y = center.y - carBox.min.y;
 
 const sky = new THREE.HemisphereLight( 0xffffff, 0x080820, 1 );
 scene.add(sky);
@@ -54,6 +69,7 @@ scene.add(sun);
 scene.add(grnd);
 scene.add(lwall);
 scene.add(rwall);
+scene.background = new THREE.Color('#DEFEFF');
 
 const facc = 0.075;
 const bacc = 0.05;
@@ -68,6 +84,22 @@ var aPress = 0;
 var dPress = 0;
 var wPress = 0;
 var sPress = 0;
+var tCam = 0;
+
+document.addEventListener("keypress", onDocumentKeyPress, false);
+function onDocumentKeyPress(event) {
+    var keyCode = event.which;
+    if (keyCode == 84 || keyCode == 116) {
+        if(tCam == 0) {
+			tCam = 1;
+			set1PCam();
+		}
+		else {
+			tCam = 0;
+			car.remove(camera);
+		}
+    }
+};
 
 document.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
@@ -104,20 +136,38 @@ function onDocumentKeyUp(event) {
 
 };
 
-function setCamPR() {
-	// camera.rotation.y = yRot;
-	camera.position.x = car.position.x + 7 * Math.sin(yRot);
-	camera.position.y = car.position.y + 3.5;
-	camera.position.z = car.position.z + 7 * Math.cos(yRot);
+function set3PCam(camera, car) {
+	camera.position.x = car.position.x + 5 * Math.sin(yRot);
+	camera.position.y = car.position.y + 2;
+	camera.position.z = car.position.z + 5 * Math.cos(yRot);
 	camera.lookAt(car.position);
 }
 
-function carGo(speed) {
+function set1PCam() {
+	camera.position.x = 0.25;
+	camera.position.y = car.position.y + 0.35;
+	camera.position.z = 0.3;
+	console.log(camera.position);
+	console.log(car.position);
+	camera.rotation.set(0, 0, 0);
+	camera.rotation.y = Math.PI;
+
+	car.add(camera);
+}
+
+	topcamera.position.y = car.position.y + 20;
+	topcamera.rotation.x = Math.PI / 2;
+	topcamera.rotation.y = Math.PI;
+
+	car.add(topcamera);
+
+
+function carGo(car, speed) {
 	car.position.x = car.position.x - speed * Math.sin(car.rotation.y - Math.PI);
 	car.position.z = car.position.z - speed * Math.cos(car.rotation.y - Math.PI);
 }
 
-function carMove() {
+function carMove(car) {
 	if(wPress == 1) {
 		if(speed < flim) {
 			speed += facc;
@@ -204,23 +254,50 @@ function carMove() {
 			}
 		}
 	}
-	carGo(speed);
+	carGo(car, speed);
 }
+
+function winResize() {
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+
+	minimHeight = window.innerHeight / 4;
+	minimWidth = window.innerHeight / 4;
+
+	topcamera.left = -minimWidth / 20;
+	topcamera.right = minimWidth / 20;
+	topcamera.top = minimHeight / 20;
+	topcamera.bottom = -minimHeight / 20;
+	topcamera.updateProjectionMatrix();
+}
+
+winResize();
+window.addEventListener("resize", winResize);
 
 function animate() {
 	requestAnimationFrame( animate );
 
 	grnd.rotation.x = Math.PI/2;
 
-	carMove();
+	carMove(car);
 
-	// if(carBox.intersectsBox(lwall))
-	// {
-	// 	lwall.visible = false;
-	// }
+	if(tCam == 0) {
+		set3PCam(camera, car);
+	}
 
-	setCamPR(camera, car);
+	renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
 	renderer.render( scene, camera );
+
+	renderer.clearDepth();
+
+	renderer.setScissorTest(true);
+
+	renderer.setScissor(window.innerWidth - minimWidth - 16, window.innerHeight - minimHeight - 16, minimWidth, minimHeight);
+	renderer.setViewport(window.innerWidth - minimWidth - 16, window.innerHeight - minimHeight - 16, minimWidth, minimHeight);
+	renderer.render(scene, topcamera);
+
+	renderer.setScissorTest(false);
 };
 
 animate();
