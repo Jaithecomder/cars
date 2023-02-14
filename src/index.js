@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OBB } from 'three/examples/jsm/math/OBB'
 import { createCube, rotateCube } from './cube';
 import { createLight, moveLight } from './lighting';
 import { createPlane } from './plane';
@@ -22,11 +23,15 @@ document.body.appendChild( renderer.domElement );
 const sun = createLight(10, 100, 100, 100);
 const grnd = createPlane(1000, 1000);
 grnd.position.y = 0;
-const lwall = createCube(0.5, 1, 10);
-lwall.position.x = -5;
+const lwall = createCube(0.5, 2, 10);
+const lwallbox = new THREE.Box3().setFromObject(lwall);
+lwall.geometry.userData.obb = new OBB().fromBox3(lwallbox);
+lwall.userData.obb = new OBB();
+lwall.position.x = -10;
 lwall.position.y = 1;
-const rwall = createCube(0.5, 1, 10);
-rwall.position.x = 5;
+
+const rwall = createCube(0.5, 2, 10);
+rwall.position.x = 10;
 rwall.position.y = 1;
 
 function dumpObject(obj, lines = [], isLast = true, prefix = '') {
@@ -52,15 +57,22 @@ scene.add(car);
 var yRot = 0;
 
 const carBox = new THREE.Box3().setFromObject(car);
-const bsize = new THREE.Vector3();
-carBox.getSize(bsize);
 
 var center = new THREE.Vector3();
 carBox.getCenter(center);
-console.log(center);
+const carHb = createCube(carBox.max.x - carBox.min.x, carBox.max.y - carBox.min.y, carBox.max.z - carBox.min.z);
+
+carHb.position.sub(center);
+carHb.position.y = center.y - carBox.min.y;
+car.add(carHb);
+
 car.position.sub(center);
 
-car.position.y = center.y - carBox.min.y;
+car.position.y = -carBox.min.y;
+
+carBox.applyMatrix4(car.matrixWorld);
+carHb.geometry.userData.obb = new OBB().fromBox3(carBox);
+carHb.userData.obb = new OBB();
 
 const sky = new THREE.HemisphereLight( 0xffffff, 0x080820, 1 );
 scene.add(sky);
@@ -73,8 +85,8 @@ scene.background = new THREE.Color('#DEFEFF');
 
 const facc = 0.075;
 const bacc = 0.05;
-const fricacc = 0.2;
-const flim = 1;
+const fricacc = 0.05;
+const flim = 1.5;
 const blim = -0.5;
 var speed = 0;
 var turnSp = 0;
@@ -144,8 +156,8 @@ function set3PCam(camera, car) {
 }
 
 function set1PCam() {
-	camera.position.x = 0.25;
-	camera.position.y = car.position.y + 0.35;
+	camera.position.x = 0.3;
+	camera.position.y = 0.9;
 	camera.position.z = 0.3;
 	console.log(camera.position);
 	console.log(car.position);
@@ -257,6 +269,17 @@ function carMove(car) {
 	carGo(car, speed);
 }
 
+function checkColl(obj1, obj2)
+{
+	obj1.userData.obb.copy(obj1.geometry.userData.obb);
+	obj1.userData.obb.applyMatrix4(obj1.matrixWorld);
+
+	obj2.userData.obb.copy(obj2.geometry.userData.obb);
+	obj2.userData.obb.applyMatrix4(obj2.matrixWorld);
+
+	return obj1.userData.obb.intersectsOBB(obj2.userData.obb);
+}
+
 function winResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
@@ -284,6 +307,13 @@ function animate() {
 
 	if(tCam == 0) {
 		set3PCam(camera, car);
+	}
+
+	if(checkColl(lwall , carHb)) {
+		lwall.visible = false;
+	}
+	else {
+		lwall.visible = true;
 	}
 
 	renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
