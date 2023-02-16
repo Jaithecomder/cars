@@ -27,10 +27,21 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.outputEncoding = THREE.sRGBEncoding;
 document.body.appendChild( renderer.domElement );
 
+const stGeometry = new THREE.PlaneGeometry(180, 100);
+const tLoader = new THREE.TextureLoader();
+const stMaterial = new THREE.MeshBasicMaterial({map: tLoader.load('../resources/startscreen/race-startscreen.png'), side: THREE.DoubleSide});
+const stPlane = new THREE.Mesh( stGeometry, stMaterial )
+
+stCamera.position.z = 5;
+
+startScene.add(stPlane);
+
+startScene.background = new THREE.Color('#DEFEFF');
+
 const sun = createLight(10, 100, 100, 100);
 const grnd = createPlane(1000, 1000);
 grnd.position.y = 0;
-grnd.rotation.x = Math.PI/2;
+grnd.rotation.x = Math.PI / 2;
 const lwall = createCube(0.5, 2, 200);
 const lwallbox = new THREE.Box3().setFromObject(lwall);
 lwall.geometry.userData.obb = new OBB().fromBox3(lwallbox);
@@ -282,6 +293,14 @@ function carMove(car) {
 			}
 		}
 	}
+	if(car.rotation.y - Math.PI > Math.PI) {
+		car.rotation.y -= 2 * Math.PI;
+		yRot -= 2 * Math.PI;
+	}
+	if(car.rotation.y - Math.PI < - Math.PI) {
+		car.rotation.y += 2 * Math.PI;
+		yRot += 2 * Math.PI;
+	}
 	carGo(car, speed);
 }
 
@@ -327,12 +346,31 @@ function animate() {
 		}
 
 		if(checkColl(lwall , carHb)) {
-			car.rotation.y = lwall.rotation.y - car.rotation.y + 2 * Math.PI;
-			yRot = lwall.rotation.y - yRot;
-			const carWallDist = Math.abs(carHalfDiag * Math.sin(lwall.rotation.y - car.rotation.y + Math.PI));
-			car.position.x = car.position.x + carWallDist * Math.cos(lwall.rotation.y);
-			car.position.z = car.position.z - carWallDist * Math.sin(lwall.rotation.y);
-			speed = speed / 3;
+			const colAngle = lwall.rotation.y - car.rotation.y + Math.PI;
+			if(colAngle > - Math.PI / 4 && colAngle < Math.PI / 4) {
+				car.rotation.y = lwall.rotation.y + Math.PI;
+				yRot = lwall.rotation.y;
+				const carWallDist = Math.abs(carHalfDiag * Math.sin(lwall.rotation.y - car.rotation.y + Math.PI)) + 0.01;
+				car.position.x = car.position.x + carWallDist * Math.cos(lwall.rotation.y);
+				car.position.z = car.position.z - carWallDist * Math.sin(lwall.rotation.y);
+				speed = speed / 3;
+			}
+			else if(colAngle < - Math.PI / 4) {
+				car.rotation.y = lwall.rotation.y + Math.PI + Math.PI / 2;
+				yRot = lwall.rotation.y + Math.PI / 2;
+				const carWallDist = Math.abs(carHalfDiag * Math.sin(lwall.rotation.y - car.rotation.y + Math.PI));
+				car.position.x = car.position.x + carWallDist * Math.cos(lwall.rotation.y);
+				car.position.z = car.position.z - carWallDist * Math.sin(lwall.rotation.y);
+				speed = 0;
+			}
+			else {
+				car.rotation.y = lwall.rotation.y + Math.PI - Math.PI / 2;
+				yRot = lwall.rotation.y - Math.PI / 2;
+				const carWallDist = Math.abs(carHalfDiag * Math.sin(lwall.rotation.y - car.rotation.y + Math.PI));
+				car.position.x = car.position.x + carWallDist * Math.cos(lwall.rotation.y);
+				car.position.z = car.position.z - carWallDist * Math.sin(lwall.rotation.y);
+				speed = 0;
+			}
 		}
 		else {
 			lwall.visible = true;
@@ -352,6 +390,7 @@ function animate() {
 		renderer.setScissorTest(false);
 	}
 	else if (start == 0) {
+		// stCamera.rotation.x += 0.01;
 		renderer.render(startScene, stCamera);
 	}
 };
