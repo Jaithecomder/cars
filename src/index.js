@@ -52,6 +52,14 @@ const lwall2 = createWall(51, 3, -118, - Math.PI / 4);
 lWalls.add(lwall2);
 const lwall3 = createWall(101, 71, -136, - Math.PI / 2);
 lWalls.add(lwall3);
+const lwall4 = createWall(4, 121, -138, 0);
+lWalls.add(lwall4);
+const lwall5 = createWall(376, -66.5, -140, Math.PI / 2);
+lWalls.add(lwall5);
+const lwall6 = createWall(26, -263.5, -130.5, 3 * Math.PI / 4);
+lWalls.add(lwall6);
+const lwall10 = createWall(26, -24, 109, - Math.PI / 4);
+lWalls.add(lwall10);
 
 scene.add(lWalls);
 
@@ -63,6 +71,18 @@ const rwall2 = createWall(26, 24, -96.5, - Math.PI / 4);
 rWalls.add(rwall2);
 const rwall3 = createWall(101, 83.5, -106, - Math.PI / 2);
 rWalls.add(rwall3);
+const rwall4 = createWall(25, 142, -115, - Math.PI / 4);
+rWalls.add(rwall4);
+const rwall5 = createWall(30, 151, -138, 0);
+rWalls.add(rwall5);
+const rwall6 = createWall(25, 142, -161, Math.PI / 4);
+rWalls.add(rwall6);
+const rwall7 = createWall(401, -66.5, -170, Math.PI / 2);
+rWalls.add(rwall7);
+const rwall8 = createWall(51, -284.5, -152, 3 * Math.PI / 4);
+rWalls.add(rwall8);
+const rwall12 = createWall(51, -3, 130.5, - Math.PI / 4);
+rWalls.add(rwall12);
 
 scene.add(rWalls);
 
@@ -193,7 +213,7 @@ scene.add(grnd);
 scene.background = new THREE.Color('#DEFEFF');
 
 const facc = 60;
-const bacc = 40;
+const bacc = 60;
 const fricacc = 10;
 const flim = 100;
 const blim = -50;
@@ -421,10 +441,10 @@ function winResize() {
 	minimHeight = window.innerHeight / 4;
 	minimWidth = window.innerHeight / 4;
 
-	topcamera.left = -minimWidth / 10;
-	topcamera.right = minimWidth / 10;
-	topcamera.top = minimHeight / 10;
-	topcamera.bottom = -minimHeight / 10;
+	topcamera.left = -minimWidth / 5;
+	topcamera.right = minimWidth / 5;
+	topcamera.top = minimHeight / 5;
+	topcamera.bottom = -minimHeight / 5;
 	topcamera.updateProjectionMatrix();
 }
 
