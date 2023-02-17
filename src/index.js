@@ -4,6 +4,7 @@ import { OBB } from 'three/examples/jsm/math/OBB'
 import { createCube, rotateCube } from './cube';
 import { createLight, moveLight } from './lighting';
 import { createPlane } from './plane';
+import { createWall } from './wall';
 
 const startScene = new THREE.Scene();
 const scene = new THREE.Scene();
@@ -42,34 +43,33 @@ const sun = createLight(10, 100, 100, 100);
 const grnd = createPlane(1000, 1000);
 grnd.position.y = 0;
 grnd.rotation.x = Math.PI / 2;
-const lwall = createCube(0.5, 2, 200);
-const lwallbox = new THREE.Box3().setFromObject(lwall);
-lwall.geometry.userData.obb = new OBB().fromBox3(lwallbox);
-lwall.userData.obb = new OBB();
-lwall.position.x = -10;
-lwall.position.y = 1;
 
-const rwall = createCube(0.5, 2, 10);
-rwall.position.x = 10;
-rwall.position.y = 1;
+const lWalls = new THREE.Group();
 
-function dumpObject(obj, lines = [], isLast = true, prefix = '') {
-	const localPrefix = isLast ? '└─' : '├─';
-	lines.push(`${prefix}${prefix ? localPrefix : ''}${obj.name || '*no-name*'} [${obj.type}]`);
-	const newPrefix = prefix + (isLast ? '  ' : '│ ');
-	const lastNdx = obj.children.length - 1;
-	obj.children.forEach((child, ndx) => {
-	  const isLast = ndx === lastNdx;
-	  dumpObject(child, lines, isLast, newPrefix);
-	});
-	return lines;
-  }
+const lwall1 = createWall(200, -15, 0, 0);
+lWalls.add(lwall1);
+const lwall2 = createWall(51, 3, -118, - Math.PI / 4);
+lWalls.add(lwall2);
+const lwall3 = createWall(101, 71, -136, - Math.PI / 2);
+lWalls.add(lwall3);
+
+scene.add(lWalls);
+
+const rWalls = new THREE.Group();
+
+const rwall1 = createWall(200, 15, 12.5, 0);
+rWalls.add(rwall1);
+const rwall2 = createWall(26, 24, -96.5, - Math.PI / 4);
+rWalls.add(rwall2);
+const rwall3 = createWall(101, 83.5, -106, - Math.PI / 2);
+rWalls.add(rwall3);
+
+scene.add(rWalls);
 
 const loader = new GLTFLoader();
 
-const gltf = await loader.loadAsync('../resources/car1/scene.gltf');
+const gltf = await loader.loadAsync('../resources/car/scene.gltf');
 const car = gltf.scene;
-console.log(dumpObject(car).join('\n'));
 car.rotation.y = Math.PI;
 scene.add(car);
 
@@ -79,7 +79,6 @@ const carBox = new THREE.Box3().setFromObject(car);
 
 var center = new THREE.Vector3();
 carBox.getCenter(center);
-const carHalfDiag = Math.sqrt((center.x - carBox.min.x) * (center.x - carBox.min.x) + (center.z - carBox.min.z) * (center.z - carBox.min.z))
 const carHb = createCube(carBox.max.x - carBox.min.x, carBox.max.y - carBox.min.y, carBox.max.z - carBox.min.z);
 
 carHb.position.sub(center);
@@ -90,23 +89,112 @@ carHb.visible = false;
 car.position.sub(center);
 
 car.position.y = -carBox.min.y;
+car.position.x = -7.5;
 
 carBox.applyMatrix4(car.matrixWorld);
 carHb.geometry.userData.obb = new OBB().fromBox3(carBox);
 carHb.userData.obb = new OBB();
+
+const opponents = new THREE.Group();
+
+// opp1---------------------------------------------------------------------------
+
+const e1glb = await loader.loadAsync('../resources/enemycar/mclaren-blue.glb');
+const e1Car = e1glb.scene;
+e1Car.rotation.y = Math.PI;
+
+const e1CarBox = new THREE.Box3().setFromObject(e1Car);
+
+var e1Center = new THREE.Vector3();
+e1CarBox.getCenter(e1Center);
+const e1CarHb = createCube(e1CarBox.max.x - e1CarBox.min.x, e1CarBox.max.y - e1CarBox.min.y, e1CarBox.max.z - e1CarBox.min.z);
+
+e1CarHb.position.sub(e1Center);
+e1CarHb.position.y = e1Center.y - e1CarBox.min.y;
+e1Car.add(e1CarHb);
+e1CarHb.visible = false;
+
+e1Car.position.sub(e1Center);
+
+e1Car.position.y = -e1CarBox.min.y;
+e1Car.position.x = -2.5;
+
+e1CarBox.applyMatrix4(e1Car.matrixWorld);
+e1CarHb.geometry.userData.obb = new OBB().fromBox3(e1CarBox);
+e1CarHb.userData.obb = new OBB();
+
+opponents.add(e1Car);
+
+// opp2-----------------------------------------------------------------------
+
+const e2glb = await loader.loadAsync('../resources/enemycar/mclaren-blue.glb');
+const e2Car = e2glb.scene;
+e2Car.rotation.y = Math.PI;
+
+const e2CarBox = new THREE.Box3().setFromObject(e2Car);
+
+var e2Center = new THREE.Vector3();
+e2CarBox.getCenter(e2Center);
+const e2CarHb = createCube(e2CarBox.max.x - e2CarBox.min.x, e2CarBox.max.y - e2CarBox.min.y, e2CarBox.max.z - e2CarBox.min.z);
+
+e2CarHb.position.sub(e2Center);
+e2CarHb.position.y = e2Center.y - e2CarBox.min.y;
+e2Car.add(e2CarHb);
+e2CarHb.visible = false;
+
+e2Car.position.sub(e2Center);
+
+e2Car.position.y = -e2CarBox.min.y;
+e2Car.position.x = 2.5;
+
+e2CarBox.applyMatrix4(e2Car.matrixWorld);
+e2CarHb.geometry.userData.obb = new OBB().fromBox3(e2CarBox);
+e2CarHb.userData.obb = new OBB();
+
+opponents.add(e2Car);
+
+// opp3----------------------------------------------------------------------------------
+
+const e3glb = await loader.loadAsync('../resources/enemycar/mclaren-blue.glb');
+const e3Car = e3glb.scene;
+e3Car.rotation.y = Math.PI;
+
+const e3CarBox = new THREE.Box3().setFromObject(e3Car);
+
+var e3Center = new THREE.Vector3();
+e3CarBox.getCenter(e3Center);
+const e3CarHb = createCube(e3CarBox.max.x - e3CarBox.min.x, e3CarBox.max.y - e3CarBox.min.y, e3CarBox.max.z - e3CarBox.min.z);
+
+e3CarHb.position.sub(e3Center);
+e3CarHb.position.y = e3Center.y - e3CarBox.min.y;
+e3Car.add(e3CarHb);
+e3CarHb.visible = false;
+
+e3Car.position.sub(e3Center);
+
+e3Car.position.y = -e3CarBox.min.y;
+e3Car.position.x = 7.5;
+
+e3CarBox.applyMatrix4(e3Car.matrixWorld);
+e3CarHb.geometry.userData.obb = new OBB().fromBox3(e3CarBox);
+e3CarHb.userData.obb = new OBB();
+
+opponents.add(e3Car);
+
+// ---------------------------------------------------------------------------------------------
+
+scene.add(opponents);
 
 const sky = new THREE.HemisphereLight( 0xffffff, 0x080820, 1 );
 scene.add(sky);
 
 scene.add(sun);
 scene.add(grnd);
-scene.add(lwall);
-scene.add(rwall);
 scene.background = new THREE.Color('#DEFEFF');
 
-const facc = 2;
-const bacc = 1;
-const fricacc = 1;
+const facc = 60;
+const bacc = 40;
+const fricacc = 10;
 const flim = 100;
 const blim = -50;
 var speed = 0;
@@ -209,13 +297,13 @@ function carGo(car, speed) {
 function carMove(car) {
 	if(wPress == 1) {
 		if(speed < flim) {
-			speed += facc;
+			speed += facc * deltaTime;
 		}
 	}
 	else {
 		if(speed > 0) {
 			if(speed > fricacc) {
-				speed -= fricacc;
+				speed -= fricacc * deltaTime;
 			}
 			else {
 				speed = 0;
@@ -224,13 +312,13 @@ function carMove(car) {
 	}
 	if(sPress == 1) {
 		if(speed > blim) {
-			speed -= bacc;
+			speed -= bacc * deltaTime;
 		}
 	}
 	else {
 		if(speed < 0) {
 			if(speed < -fricacc) {
-				speed += fricacc;
+				speed += fricacc * deltaTime;
 			}
 			else {
 				speed = 0;
@@ -304,8 +392,7 @@ function carMove(car) {
 	carGo(car, speed);
 }
 
-function checkColl(obj1, obj2)
-{
+function checkColl(obj1, obj2) {
 	obj1.userData.obb.copy(obj1.geometry.userData.obb);
 	obj1.userData.obb.applyMatrix4(obj1.matrixWorld);
 
@@ -313,6 +400,17 @@ function checkColl(obj1, obj2)
 	obj2.userData.obb.applyMatrix4(obj2.matrixWorld);
 
 	return obj1.userData.obb.intersectsOBB(obj2.userData.obb);
+}
+
+function collide(wall, car, ws) {
+	if(checkColl(wall , carHb)) {
+		car.rotation.y = wall.rotation.y + Math.PI;
+		yRot = wall.rotation.y;
+		car.position.x = car.position.x + ws * 10 * Math.cos(wall.rotation.y);
+		car.position.z = car.position.z - ws * 10 * Math.sin(wall.rotation.y);
+		console.log(car.rotation);
+	}
+
 }
 
 function winResize() {
@@ -323,15 +421,17 @@ function winResize() {
 	minimHeight = window.innerHeight / 4;
 	minimWidth = window.innerHeight / 4;
 
-	topcamera.left = -minimWidth / 20;
-	topcamera.right = minimWidth / 20;
-	topcamera.top = minimHeight / 20;
-	topcamera.bottom = -minimHeight / 20;
+	topcamera.left = -minimWidth / 10;
+	topcamera.right = minimWidth / 10;
+	topcamera.top = minimHeight / 10;
+	topcamera.bottom = -minimHeight / 10;
 	topcamera.updateProjectionMatrix();
 }
 
 winResize();
 window.addEventListener("resize", winResize);
+
+var load = 0;
 
 function animate() {
 	requestAnimationFrame( animate );
@@ -345,35 +445,14 @@ function animate() {
 			set3PCam(camera, car);
 		}
 
-		if(checkColl(lwall , carHb)) {
-			const colAngle = lwall.rotation.y - car.rotation.y + Math.PI;
-			if(colAngle > - Math.PI / 4 && colAngle < Math.PI / 4) {
-				car.rotation.y = lwall.rotation.y + Math.PI;
-				yRot = lwall.rotation.y;
-				const carWallDist = Math.abs(carHalfDiag * Math.sin(lwall.rotation.y - car.rotation.y + Math.PI)) + 0.01;
-				car.position.x = car.position.x + carWallDist * Math.cos(lwall.rotation.y);
-				car.position.z = car.position.z - carWallDist * Math.sin(lwall.rotation.y);
-				speed = speed / 3;
+		if(load != 0) {
+			for(let i = 0; i < lWalls.children.length; i++) {
+				collide(lWalls.children[i], car, 1);
 			}
-			else if(colAngle < - Math.PI / 4) {
-				car.rotation.y = lwall.rotation.y + Math.PI + Math.PI / 2;
-				yRot = lwall.rotation.y + Math.PI / 2;
-				const carWallDist = Math.abs(carHalfDiag * Math.sin(lwall.rotation.y - car.rotation.y + Math.PI));
-				car.position.x = car.position.x + carWallDist * Math.cos(lwall.rotation.y);
-				car.position.z = car.position.z - carWallDist * Math.sin(lwall.rotation.y);
-				speed = 0;
+
+			for(let i = 0; i < rWalls.children.length; i++) {
+				collide(rWalls.children[i], car, -1);
 			}
-			else {
-				car.rotation.y = lwall.rotation.y + Math.PI - Math.PI / 2;
-				yRot = lwall.rotation.y - Math.PI / 2;
-				const carWallDist = Math.abs(carHalfDiag * Math.sin(lwall.rotation.y - car.rotation.y + Math.PI));
-				car.position.x = car.position.x + carWallDist * Math.cos(lwall.rotation.y);
-				car.position.z = car.position.z - carWallDist * Math.sin(lwall.rotation.y);
-				speed = 0;
-			}
-		}
-		else {
-			lwall.visible = true;
 		}
 
 		renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
@@ -388,9 +467,9 @@ function animate() {
 		renderer.render(scene, topcamera);
 
 		renderer.setScissorTest(false);
+		load = 1;
 	}
 	else if (start == 0) {
-		// stCamera.rotation.x += 0.01;
 		renderer.render(startScene, stCamera);
 	}
 };
