@@ -58,6 +58,12 @@ const lwall5 = createWall(376, -66.5, -140, Math.PI / 2);
 lWalls.add(lwall5);
 const lwall6 = createWall(26, -263.5, -130.5, 3 * Math.PI / 4);
 lWalls.add(lwall6);
+const lwall7 = createWall(222, -272.5, -10.5, Math.PI);
+lWalls.add(lwall7);
+const lwall8 = createWall(26, -263.5, 109, - 3 * Math.PI / 4);
+lWalls.add(lwall8)
+const lwall9 = createWall(221.5, -143.9, 118.5, - Math.PI / 2);
+lWalls.add(lwall9);
 const lwall10 = createWall(26, -24, 109, - Math.PI / 4);
 lWalls.add(lwall10);
 
@@ -81,6 +87,12 @@ const rwall7 = createWall(401, -66.5, -170, Math.PI / 2);
 rWalls.add(rwall7);
 const rwall8 = createWall(51, -284.5, -152, 3 * Math.PI / 4);
 rWalls.add(rwall8);
+const rwall9 = createWall(247, -302.5, -10.5, Math.PI);
+rWalls.add(rwall9);
+const rwall10 = createWall(51, -284.5, 130.5, - 3 * Math.PI / 4);
+rWalls.add(rwall10);
+const rwall11 = createWall(246, -144, 148.5, - Math.PI / 2);
+rWalls.add(rwall11);
 const rwall12 = createWall(51, -3, 130.5, - Math.PI / 4);
 rWalls.add(rwall12);
 
@@ -204,6 +216,18 @@ opponents.add(e3Car);
 // ---------------------------------------------------------------------------------------------
 
 scene.add(opponents);
+
+// stadium----------------------------------------------------------------------------------
+
+const stadium = await loader.loadAsync('../resources/stadium/stadium.glb');
+const stad = stadium.scene;
+stad.scale.x = 100;
+stad.scale.y = 100;
+stad.scale.z = 100;
+stad.position.y = -10;
+stad.position.x = -50;
+
+scene.add(stad);
 
 const sky = new THREE.HemisphereLight( 0xffffff, 0x080820, 1 );
 scene.add(sky);
