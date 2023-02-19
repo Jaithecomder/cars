@@ -5,6 +5,7 @@ import { createCube, rotateCube } from './cube';
 import { createLight, moveLight } from './lighting';
 import { createPlane } from './plane';
 import { createWall } from './wall';
+import { createCP } from './checkpoint';
 
 const startScene = new THREE.Scene();
 const scene = new THREE.Scene();
@@ -52,7 +53,7 @@ const lwall2 = createWall(51, 3, -118, - Math.PI / 4);
 lWalls.add(lwall2);
 const lwall3 = createWall(101, 71, -136, - Math.PI / 2);
 lWalls.add(lwall3);
-const lwall4 = createWall(4, 121, -138, 0);
+const lwall4 = createWall(4, 121.5, -138, 0);
 lWalls.add(lwall4);
 const lwall5 = createWall(376, -66.5, -140, Math.PI / 2);
 lWalls.add(lwall5);
@@ -157,7 +158,7 @@ opponents.add(e1Car);
 
 // opp2-----------------------------------------------------------------------
 
-const e2glb = await loader.loadAsync('../resources/enemycar/mclaren-blue.glb');
+const e2glb = await loader.loadAsync('../resources/enemycar/mclaren-yellow.glb');
 const e2Car = e2glb.scene;
 e2Car.rotation.y = Math.PI;
 
@@ -184,7 +185,7 @@ opponents.add(e2Car);
 
 // opp3----------------------------------------------------------------------------------
 
-const e3glb = await loader.loadAsync('../resources/enemycar/mclaren-blue.glb');
+const e3glb = await loader.loadAsync('../resources/enemycar/mclaren-cyan.glb');
 const e3Car = e3glb.scene;
 e3Car.rotation.y = Math.PI;
 
@@ -390,7 +391,63 @@ can5Hb.userData.obb = new OBB();
 fCans.add(can5);
 fCans.add(can5Hb);
 
+//----------------------------------------------------------------------------------------
+
 scene.add(fCans);
+
+// checkpoints----------------------------------------------------------------------------
+
+const checkPoints = new THREE.Group();
+
+const cp1 = createCP(0, -85, 0);
+cp1.visible = false;
+checkPoints.add(cp1);
+
+const cp2 = createCP(33.5, -121, Math.PI / 2);
+cp2.visible = false;
+checkPoints.add(cp2);
+
+const cp3 = createCP(120, -121, Math.PI / 2);
+cp3.visible = false;
+checkPoints.add(cp3);
+
+const cp4 = createCP(136, -138, 0);
+cp4.visible = false;
+checkPoints.add(cp4);
+
+const cp5 = createCP(120, -155, Math.PI / 2);
+cp5.visible = false;
+checkPoints.add(cp5);
+
+const cp6 = createCP(-254, -155, Math.PI / 2);
+cp6.visible = false;
+checkPoints.add(cp6);
+
+const cp7 = createCP(-287.5, -120, 0);
+cp7.visible = false;
+checkPoints.add(cp7);
+
+const cp8 = createCP(-287.5, 100, 0);
+cp8.visible = false;
+checkPoints.add(cp8);
+
+const cp9 = createCP(-254, 133.5, Math.PI / 2);
+cp9.visible = false;
+checkPoints.add(cp9);
+
+const cp10 = createCP(-34, 133.5, Math.PI / 2);
+cp10.visible = false;
+checkPoints.add(cp10);
+
+const cp11 = createCP(0, 100, 0);
+cp11.visible = false;
+checkPoints.add(cp11);
+
+const cp12 = createCP(0, 0, 0);
+cp12.visible = false;
+checkPoints.add(cp12);
+
+scene.add(checkPoints);
 
 const sky = new THREE.HemisphereLight( 0xffffff, 0x080820, 1 );
 scene.add(sky);
@@ -509,9 +566,9 @@ function carMove(car) {
 		if(speed < flim) {
 			speed += facc * deltaTime;
 		}
-		if(speed > 0) {
-			fuel -= 10 * deltaTime;
-		}
+		// if(speed > 0) {
+		// 	fuel -= 10 * deltaTime;
+		// }
 		if(fuel < 0) {
 			fuel = 0;
 		}
@@ -530,9 +587,9 @@ function carMove(car) {
 		if(speed > blim) {
 			speed -= bacc * deltaTime;
 		}
-		if(speed < 0) {
-			fuel -= 10 * deltaTime;
-		}
+		// if(speed < 0) {
+		// 	fuel -= 10 * deltaTime;
+		// }
 		if(fuel < 0) {
 			fuel = 0;
 		}
