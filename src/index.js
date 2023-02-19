@@ -123,7 +123,6 @@ car.position.sub(center);
 car.position.y = -carBox.min.y;
 car.position.x = -7.5;
 
-carBox.applyMatrix4(car.matrixWorld);
 carHb.geometry.userData.obb = new OBB().fromBox3(carBox);
 carHb.userData.obb = new OBB();
 
@@ -151,7 +150,6 @@ e1Car.position.sub(e1Center);
 e1Car.position.y = -e1CarBox.min.y;
 e1Car.position.x = -2.5;
 
-e1CarBox.applyMatrix4(e1Car.matrixWorld);
 e1CarHb.geometry.userData.obb = new OBB().fromBox3(e1CarBox);
 e1CarHb.userData.obb = new OBB();
 
@@ -179,7 +177,6 @@ e2Car.position.sub(e2Center);
 e2Car.position.y = -e2CarBox.min.y;
 e2Car.position.x = 2.5;
 
-e2CarBox.applyMatrix4(e2Car.matrixWorld);
 e2CarHb.geometry.userData.obb = new OBB().fromBox3(e2CarBox);
 e2CarHb.userData.obb = new OBB();
 
@@ -207,13 +204,12 @@ e3Car.position.sub(e3Center);
 e3Car.position.y = -e3CarBox.min.y;
 e3Car.position.x = 7.5;
 
-e3CarBox.applyMatrix4(e3Car.matrixWorld);
 e3CarHb.geometry.userData.obb = new OBB().fromBox3(e3CarBox);
 e3CarHb.userData.obb = new OBB();
 
 opponents.add(e3Car);
 
-// ---------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
 
 scene.add(opponents);
 
@@ -229,6 +225,173 @@ stad.position.x = -50;
 
 scene.add(stad);
 
+// fuel cans---------------------------------------------------------------------------------
+
+const fCans = new THREE.Group();
+const fCansHb = new THREE.Group();
+
+// can1-------------------------------------------------------------------------------------
+
+const c1glb = await loader.loadAsync('../resources/fuelcan/fuelcan.glb');
+const can1 = c1glb.scene;
+can1.rotation.y = - Math.PI / 4;
+
+const can1Box = new THREE.Box3().setFromObject(can1);
+
+var can1Center = new THREE.Vector3();
+can1Box.getCenter(can1Center);
+const can1Hb = createCube(can1Box.max.x - can1Box.min.x, can1Box.max.y - can1Box.min.y, can1Box.max.z - can1Box.min.z);
+
+can1Hb.position.y = can1Center.y - can1Box.min.y;
+can1Hb.visible = false;
+
+can1.position.sub(can1Center);
+
+can1.position.y = -can1Box.min.y;
+can1.position.x = Math.random() * 25 - 12.5;
+can1.position.z = -75;
+
+can1Hb.position.x = can1.position.x;
+can1Hb.position.y = can1.position.y;
+can1Hb.position.z = can1.position.z;
+
+can1Box.applyMatrix4(can1Hb.matrixWorld);
+can1Hb.geometry.userData.obb = new OBB().fromBox3(can1Box);
+can1Hb.userData.obb = new OBB();
+
+fCans.add(can1);
+fCans.add(can1Hb);
+
+// can2-----------------------------------------------------------------------------------------
+
+const c2glb = await loader.loadAsync('../resources/fuelcan/fuelcan.glb');
+const can2 = c2glb.scene;
+can2.rotation.y = Math.PI / 4;
+
+const can2Box = new THREE.Box3().setFromObject(can2);
+
+var can2Center = new THREE.Vector3();
+can2Box.getCenter(can2Center);
+const can2Hb = createCube(can2Box.max.x - can2Box.min.x, can2Box.max.y - can2Box.min.y, can2Box.max.z - can2Box.min.z);
+
+can2Hb.position.y = can2Center.y - can2Box.min.y;
+can2Hb.visible = false;
+
+can2.position.sub(can2Center);
+
+can2.position.y = -can2Box.min.y;
+can2.position.x = 40;
+can2.position.z = Math.random() * 25 - 167.5;
+
+can2Hb.position.x = can2.position.x;
+can2Hb.position.y = can2.position.y;
+can2Hb.position.z = can2.position.z;
+
+can2Box.applyMatrix4(can2Hb.matrixWorld);
+can2Hb.geometry.userData.obb = new OBB().fromBox3(can2Box);
+can2Hb.userData.obb = new OBB();
+
+fCans.add(can2);
+fCans.add(can2Hb);
+
+// can3-----------------------------------------------------------------------------------------
+
+const c3glb = await loader.loadAsync('../resources/fuelcan/fuelcan.glb');
+const can3 = c3glb.scene;
+can3.rotation.y = Math.PI / 4;
+
+const can3Box = new THREE.Box3().setFromObject(can3);
+
+var can3Center = new THREE.Vector3();
+can3Box.getCenter(can3Center);
+const can3Hb = createCube(can3Box.max.x - can3Box.min.x, can3Box.max.y - can3Box.min.y, can3Box.max.z - can3Box.min.z);
+
+can3Hb.position.y = can3Center.y - can3Box.min.y;
+can3Hb.visible = false;
+
+can3.position.sub(can3Center);
+
+can3.position.y = -can3Box.min.y;
+can3.position.x = -175;
+can3.position.z = Math.random() * 25 - 167.5;
+
+can3Hb.position.x = can3.position.x;
+can3Hb.position.y = can3.position.y;
+can3Hb.position.z = can3.position.z;
+
+can3Box.applyMatrix4(can3Hb.matrixWorld);
+can3Hb.geometry.userData.obb = new OBB().fromBox3(can3Box);
+can3Hb.userData.obb = new OBB();
+
+fCans.add(can3);
+fCans.add(can3Hb);
+
+// can4-----------------------------------------------------------------------------------------
+
+const c4glb = await loader.loadAsync('../resources/fuelcan/fuelcan.glb');
+const can4 = c4glb.scene;
+can4.rotation.y = 3 * Math.PI / 4;
+
+const can4Box = new THREE.Box3().setFromObject(can4);
+
+var can4Center = new THREE.Vector3();
+can4Box.getCenter(can4Center);
+const can4Hb = createCube(can4Box.max.x - can4Box.min.x, can4Box.max.y - can4Box.min.y, can4Box.max.z - can4Box.min.z);
+
+can4Hb.position.y = can4Center.y - can4Box.min.y;
+can4Hb.visible = false;
+
+can4.position.sub(can4Center);
+
+can4.position.y = -can4Box.min.y;
+can4.position.x = Math.random() * 25 - 300;
+can4.position.z = 30;
+
+can4Hb.position.x = can4.position.x;
+can4Hb.position.y = can4.position.y;
+can4Hb.position.z = can4.position.z;
+
+can4Box.applyMatrix4(can4Hb.matrixWorld);
+can4Hb.geometry.userData.obb = new OBB().fromBox3(can4Box);
+can4Hb.userData.obb = new OBB();
+
+fCans.add(can4);
+fCans.add(can4Hb);
+
+// can5-----------------------------------------------------------------------------------------
+
+const c5glb = await loader.loadAsync('../resources/fuelcan/fuelcan.glb');
+const can5 = c5glb.scene;
+can5.rotation.y = - 3 * Math.PI / 4;
+
+const can5Box = new THREE.Box3().setFromObject(can5);
+
+var can5Center = new THREE.Vector3();
+can5Box.getCenter(can5Center);
+const can5Hb = createCube(can5Box.max.x - can5Box.min.x, can5Box.max.y - can5Box.min.y, can5Box.max.z - can5Box.min.z);
+
+can5Hb.position.y = can5Center.y - can5Box.min.y;
+can5Hb.visible = false;
+
+can5.position.sub(can5Center);
+
+can5.position.y = -can5Box.min.y;
+can5.position.x = -75;
+can5.position.z = Math.random() * 25 + 121;
+
+can5Hb.position.x = can5.position.x;
+can5Hb.position.y = can5.position.y;
+can5Hb.position.z = can5.position.z;
+
+can5Box.applyMatrix4(can5Hb.matrixWorld);
+can5Hb.geometry.userData.obb = new OBB().fromBox3(can5Box);
+can5Hb.userData.obb = new OBB();
+
+fCans.add(can5);
+fCans.add(can5Hb);
+
+scene.add(fCans);
+
 const sky = new THREE.HemisphereLight( 0xffffff, 0x080820, 1 );
 scene.add(sky);
 
@@ -239,18 +402,23 @@ scene.background = new THREE.Color('#DEFEFF');
 const facc = 60;
 const bacc = 60;
 const fricacc = 10;
-const flim = 100;
-const blim = -50;
+const flim = 60;
+const blim = -30;
 var speed = 0;
 var turnSp = 0;
 var turnEff = 0;
 const yRotLim = 0.4;
+
 var aPress = 0;
 var dPress = 0;
 var wPress = 0;
 var sPress = 0;
 var start = 0;
 var tCam = 0;
+
+var health = 100;
+var fuel = 25;
+var time = 0;
 
 document.addEventListener("keypress", onDocumentKeyPress, false);
 function onDocumentKeyPress(event) {
@@ -318,8 +486,6 @@ function set1PCam() {
 	camera.position.x = 0.3;
 	camera.position.y = 0.9;
 	camera.position.z = 0.3;
-	console.log(camera.position);
-	console.log(car.position);
 	camera.rotation.set(0, 0, 0);
 	camera.rotation.y = Math.PI;
 
@@ -339,9 +505,15 @@ function carGo(car, speed) {
 }
 
 function carMove(car) {
-	if(wPress == 1) {
+	if(wPress == 1 && fuel > 0) {
 		if(speed < flim) {
 			speed += facc * deltaTime;
+		}
+		if(speed > 0) {
+			fuel -= 10 * deltaTime;
+		}
+		if(fuel < 0) {
+			fuel = 0;
 		}
 	}
 	else {
@@ -354,9 +526,15 @@ function carMove(car) {
 			}
 		}
 	}
-	if(sPress == 1) {
+	if(sPress == 1 && fuel > 0) {
 		if(speed > blim) {
 			speed -= bacc * deltaTime;
+		}
+		if(speed < 0) {
+			fuel -= 10 * deltaTime;
+		}
+		if(fuel < 0) {
+			fuel = 0;
 		}
 	}
 	else {
@@ -446,15 +624,21 @@ function checkColl(obj1, obj2) {
 	return obj1.userData.obb.intersectsOBB(obj2.userData.obb);
 }
 
-function collide(wall, car, ws) {
-	if(checkColl(wall , carHb)) {
+function collide(wall, car, carHb, ws) {
+	if(checkColl(wall, carHb)) {
 		car.rotation.y = wall.rotation.y + Math.PI;
 		yRot = wall.rotation.y;
 		car.position.x = car.position.x + ws * 10 * Math.cos(wall.rotation.y);
 		car.position.z = car.position.z - ws * 10 * Math.sin(wall.rotation.y);
-		console.log(car.rotation);
 	}
 
+}
+
+function collect(can, canHb, carHb) {
+	if(checkColl(canHb, carHb)) {
+		can.visible = false;
+		fuel = 50;
+	}
 }
 
 function winResize() {
@@ -465,10 +649,10 @@ function winResize() {
 	minimHeight = window.innerHeight / 4;
 	minimWidth = window.innerHeight / 4;
 
-	topcamera.left = -minimWidth / 5;
-	topcamera.right = minimWidth / 5;
-	topcamera.top = minimHeight / 5;
-	topcamera.bottom = -minimHeight / 5;
+	topcamera.left = -minimWidth / 20;
+	topcamera.right = minimWidth / 20;
+	topcamera.top = minimHeight / 20;
+	topcamera.bottom = -minimHeight / 20;
 	topcamera.updateProjectionMatrix();
 }
 
@@ -490,12 +674,17 @@ function animate() {
 		}
 
 		if(load != 0) {
+			console.log(fuel);
 			for(let i = 0; i < lWalls.children.length; i++) {
-				collide(lWalls.children[i], car, 1);
+				collide(lWalls.children[i], car, carHb, 1);
 			}
 
 			for(let i = 0; i < rWalls.children.length; i++) {
-				collide(rWalls.children[i], car, -1);
+				collide(rWalls.children[i], car, carHb, -1);
+			}
+
+			for(let i = 0; i < fCans.children.length; i += 2) {
+				collect(fCans.children[i], fCans.children[i+1], carHb);
 			}
 		}
 
