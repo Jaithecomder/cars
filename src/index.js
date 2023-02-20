@@ -9,6 +9,7 @@ import { createCP } from './checkpoint';
 
 const startScene = new THREE.Scene();
 const scene = new THREE.Scene();
+const endScene = new THREE.Scene();
 
 const aspect = window.innerWidth / window.innerHeight;
 var minimWidth = window.innerHeight / 4;
@@ -129,6 +130,7 @@ carHb.userData.obb = new OBB();
 
 const opponents = new THREE.Group();
 const oppCP = [11, 11, 11];
+const oppLaps = [0, 0, 0];
 const oppSpeeds = [0, 0, 0];
 const e1T = new THREE.Vector3();
 const e2T = new THREE.Vector3();
@@ -473,6 +475,9 @@ var turnEff = 0;
 const yRotLim = 0.4;
 var carCP = 11;
 var carLap = 0;
+
+var totalLaps = 3;
+
 var fCanDis = 0;
 var nfCan = 0;
 var dsCan = -1;
@@ -856,6 +861,7 @@ function animate() {
 					oppCP[i]++;
 					if(oppCP[i] == 12) {
 						oppCP[i] = 0;
+						oppLaps[i]++;
 					}
 					findTarget(oppCP[i], oppTargets[i]);
 				}
@@ -915,6 +921,13 @@ function animate() {
 			if(carCP == 12) {
 				carCP = 0;
 				carLap++;
+				if(carLap == totalLaps + 1) {
+					end = 1;
+				}
+			}
+
+			if(fuel == 0 && speed == 0) {
+				end = 1;
 			}
 		}
 		const dx = car.position.x - fCans.children[2 * nfCan].position.x;
@@ -941,9 +954,31 @@ function animate() {
 		renderer.render(startScene, stCamera);
 	}
 	else {
-		text.innerHTML = "";
+		text.style.color = "red";
+		text.style.fontSize = 60 + 'px';
+		text.style.top = (window.innerHeight / 2 - 200) + 'px';
+		text.style.left = (window.innerWidth / 2 - 175) + 'px';
+		text.innerHTML = "Game Over";
+		if(health == 0) {
+			text.style.color = "red";
+			text.innerHTML += "<br> You Died";
+		}
+		else if(fuel == 0 && speed == 0) {
+			text.style.color = "red";
+			text.innerHTML += "<br> Out of Fuel";
+		}
+		else {
+			var rank = 1;
+			for(let i = 0; i < oppLaps.length; i++) {
+				if(oppLaps[i] > totalLaps) {
+					rank++;
+				}
+			}
+			text.style.color = "green";
+			text.innerHTML += "<br> Your Rank: " + rank;
+		}
 		renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
-		renderer.render(startScene, stCamera);
+		renderer.render(endScene, camera);
 	}
 };
 
