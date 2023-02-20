@@ -693,7 +693,7 @@ function collidePl(wall, car, carHb, ws) {
 		yRot = wall.rotation.y;
 		car.position.x = car.position.x + ws * 10 * Math.cos(wall.rotation.y);
 		car.position.z = car.position.z - ws * 10 * Math.sin(wall.rotation.y);
-		health -= 20;
+		health -= 5;
 	}
 
 }
@@ -748,6 +748,26 @@ function animate() {
 			for(let i = 0; i < rWalls.children.length; i++) {
 				collidePl(rWalls.children[i], car, carHb, -1);
 			}
+
+			for(let i = 0; i < opponents.children.length; i++) {
+				if(checkColl(opponents.children[i].children[1], carHb)) {
+					health -= 5;
+
+					var carPos = car.position.clone();
+					carPos.sub(opponents.children[i].position);
+					var dir = carPos.clone();
+					dir.divideScalar(dir.length());
+
+					console.log(dir);
+
+					car.position.x += 0.5 * dir.x;
+					car.position.z += 0.5 * dir.z;
+
+					opponents.children[i].position.x -= 0.5 * dir.x;
+					opponents.children[i].position.z -= 0.5 * dir.z;
+				}
+			}
+
 			if(health <= 0) {
 				health = 0;
 				end = 1;
@@ -762,7 +782,6 @@ function animate() {
 					fCans.children[i].visible = false;
 					fuel = 50;
 
-					console.log(dsCan);
 					if(dsCan == 0) {
 						fCans.children[dsCan].position.x = Math.random() * 25 - 12.5;
 						fCans.children[dsCan + 1].position.x = fCans.children[dsCan].position.x;
@@ -798,7 +817,8 @@ function animate() {
 		const dx = car.position.x - fCans.children[2 * nfCan].position.x;
 		const dz = car.position.z - fCans.children[2 * nfCan].position.z;
 		fCanDis = Math.floor(Math.sqrt(dx * dx + dz * dz) / 5);
-		text.innerHTML = "Health: " + health + "<br> Fuel: " + Math.floor(fuel) + "<br> Next Can: " + fCanDis + "<br> Lap: " + carLap;
+		time += deltaTime;
+		text.innerHTML = "Health: " + health + "<br> Fuel: " + Math.floor(fuel) + "<br> Next Can: " + fCanDis + "<br> Lap: " + carLap + "<br> Time: " + Math.floor(time);
 
 		renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
 		renderer.render( scene, camera );
