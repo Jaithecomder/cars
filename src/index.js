@@ -128,6 +128,12 @@ carHb.geometry.userData.obb = new OBB().fromBox3(carBox);
 carHb.userData.obb = new OBB();
 
 const opponents = new THREE.Group();
+const oppCP = [11, 11, 11];
+const oppSpeeds = [0, 0, 0];
+const e1T = new THREE.Vector3();
+const e2T = new THREE.Vector3();
+const e3T = new THREE.Vector3();
+const oppTargets = [e1T, e2T, e3T];
 
 // opp1---------------------------------------------------------------------------
 
@@ -229,7 +235,6 @@ scene.add(stad);
 // fuel cans---------------------------------------------------------------------------------
 
 const fCans = new THREE.Group();
-const fCansHb = new THREE.Group();
 
 // can1-------------------------------------------------------------------------------------
 
@@ -460,13 +465,14 @@ const facc = 60;
 const bacc = 60;
 const fricacc = 10;
 const flim = 60;
+const oppflim = 45;
 const blim = -30;
 var speed = 0;
 var turnSp = 0;
 var turnEff = 0;
 const yRotLim = 0.4;
-var carCP = 0;
-var carLap = 1;
+var carCP = 11;
+var carLap = 0;
 var fCanDis = 0;
 var nfCan = 0;
 var dsCan = -1;
@@ -695,7 +701,89 @@ function collidePl(wall, car, carHb, ws) {
 		car.position.z = car.position.z - ws * 10 * Math.sin(wall.rotation.y);
 		health -= 5;
 	}
+}
 
+function collideOpp(wall, car, carHb, ws) {
+	if(checkColl(wall, carHb)) {
+		car.rotation.y = wall.rotation.y + Math.PI;
+		car.position.x = car.position.x + ws * 10 * Math.cos(wall.rotation.y);
+		car.position.z = car.position.z - ws * 10 * Math.sin(wall.rotation.y);
+	}
+}
+
+function findTarget(cp, oppT) {
+	var target = new THREE.Vector3();
+	target.y = 0;
+	var randVal = Math.random() * 25 - 12.5;
+	if(cp == 0 || cp ==  3 || cp == 6 || cp == 7 || cp == 10 || cp == 11) {
+		target.x = randVal + checkPoints.children[cp].position.x;
+		target.z = checkPoints.children[cp].position.z;
+	}
+	else {
+		target.x = checkPoints.children[cp].position.x;
+		target.z = randVal + checkPoints.children[cp].position.z;
+	}
+
+	oppT.copy(target);
+}
+
+function oppCarMove() {
+	for(let i = 0; i<3; i++) {
+		if(oppSpeeds[i] < oppflim) {
+			oppSpeeds[i] += facc * deltaTime;
+		}
+		if(oppSpeeds[i] > oppflim) {
+			oppSpeeds[i] = oppflim;
+		}
+		var handling = oppSpeeds[i] / 12 * deltaTime;
+
+		var dir = oppTargets[i].clone();
+		dir.sub(opponents.children[i].position);
+		dir.divideScalar(dir.length());
+
+		var straight = new THREE.Vector3().set(0, 0, -1);
+
+		var targetRot = straight.angleTo(dir);
+
+		if(dir.x > 0) {
+			targetRot = -targetRot;
+		}
+
+		var rotNeeded = targetRot - (opponents.children[i].rotation.y - Math.PI);
+		if(rotNeeded < -Math.PI) {
+			rotNeeded += 2 * Math.PI;
+		}
+		if(rotNeeded > Math.PI) {
+			rotNeeded -= 2 * Math.PI;
+		}
+
+		if((rotNeeded > 0 && rotNeeded < Math.PI)) {
+			if(rotNeeded > handling) {
+				opponents.children[i].rotation.y += handling;
+			}
+			else {
+				opponents.children[i].rotation.y = targetRot + Math.PI;
+			}
+		}
+
+		if((rotNeeded < 0 && rotNeeded > -Math.PI)) {
+			if(rotNeeded < -handling) {
+				opponents.children[i].rotation.y -= handling;
+			}
+			else {
+				opponents.children[i].rotation.y = targetRot + Math.PI;
+			}
+		}
+
+		if(opponents.children[i].rotation.y - Math.PI > Math.PI) {
+			opponents.children[i].rotation.y -= 2 * Math.PI;
+		}
+		if(opponents.children[i].rotation.y - Math.PI < - Math.PI) {
+			opponents.children[i].rotation.y += 2 * Math.PI;
+		}
+
+		carGo(opponents.children[i], oppSpeeds[i]);
+	}
 }
 
 var text = document.createElement('div');
@@ -753,12 +841,9 @@ function animate() {
 				if(checkColl(opponents.children[i].children[1], carHb)) {
 					health -= 5;
 
-					var carPos = car.position.clone();
-					carPos.sub(opponents.children[i].position);
-					var dir = carPos.clone();
+					var dir = car.position.clone();
+					dir.sub(opponents.children[i].position);
 					dir.divideScalar(dir.length());
-
-					console.log(dir);
 
 					car.position.x += 0.5 * dir.x;
 					car.position.z += 0.5 * dir.z;
@@ -766,7 +851,25 @@ function animate() {
 					opponents.children[i].position.x -= 0.5 * dir.x;
 					opponents.children[i].position.z -= 0.5 * dir.z;
 				}
+
+				if(checkColl(checkPoints.children[oppCP[i]], opponents.children[i].children[1])) {
+					oppCP[i]++;
+					if(oppCP[i] == 12) {
+						oppCP[i] = 0;
+					}
+					findTarget(oppCP[i], oppTargets[i]);
+				}
+
+				for(let j = 0; j < lWalls.children.length; j++) {
+					collideOpp(lWalls.children[j], opponents.children[i], opponents.children[i].children[1], 1);
+				}
+	
+				for(let j = 0; j < rWalls.children.length; j++) {
+					collideOpp(rWalls.children[j], opponents.children[i], opponents.children[i].children[1], -1);
+				}
 			}
+
+			oppCarMove();
 
 			if(health <= 0) {
 				health = 0;
@@ -809,7 +912,7 @@ function animate() {
 				carCP++;
 			}
 
-			if(carCP == 11) {
+			if(carCP == 12) {
 				carCP = 0;
 				carLap++;
 			}
