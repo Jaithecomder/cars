@@ -40,7 +40,7 @@ startScene.add(stPlane);
 
 startScene.background = new THREE.Color('#DEFEFF');
 
-const sun = createLight(10, 100, 100, 100);
+const sun = createLight(5, 100, 100, 100);
 const grnd = createPlane(1000, 1000);
 grnd.position.y = 0;
 grnd.rotation.x = Math.PI / 2;
@@ -465,12 +465,18 @@ var speed = 0;
 var turnSp = 0;
 var turnEff = 0;
 const yRotLim = 0.4;
+var carCP = 0;
+var carLap = 1;
+var fCanDis = 0;
+var nfCan = 0;
+var dsCan = -1;
 
 var aPress = 0;
 var dPress = 0;
 var wPress = 0;
 var sPress = 0;
 var start = 0;
+var end = 0;
 var tCam = 0;
 
 var health = 100;
@@ -549,11 +555,11 @@ function set1PCam() {
 	car.add(camera);
 }
 
-	topcamera.position.y = car.position.y + 20;
-	topcamera.rotation.x = Math.PI / 2;
-	topcamera.rotation.y = Math.PI;
+topcamera.position.y = car.position.y + 20;
+topcamera.rotation.x = Math.PI / 2;
+topcamera.rotation.y = Math.PI;
 
-	car.add(topcamera);
+car.add(topcamera);
 
 
 function carGo(car, speed) {
@@ -566,9 +572,9 @@ function carMove(car) {
 		if(speed < flim) {
 			speed += facc * deltaTime;
 		}
-		// if(speed > 0) {
-		// 	fuel -= 10 * deltaTime;
-		// }
+		if(speed > 0) {
+			fuel -= 10 * deltaTime;
+		}
 		if(fuel < 0) {
 			fuel = 0;
 		}
@@ -587,9 +593,9 @@ function carMove(car) {
 		if(speed > blim) {
 			speed -= bacc * deltaTime;
 		}
-		// if(speed < 0) {
-		// 	fuel -= 10 * deltaTime;
-		// }
+		if(speed < 0) {
+			fuel -= 10 * deltaTime;
+		}
 		if(fuel < 0) {
 			fuel = 0;
 		}
@@ -605,8 +611,8 @@ function carMove(car) {
 		}
 	}
 
-	turnSp = speed / 50 * deltaTime;
-	turnEff = speed / 50 * deltaTime;
+	turnSp = speed / 30 * deltaTime;
+	turnEff = speed / 30 * deltaTime;
 
 	if(speed >= 0) {
 		if(aPress == 1) {
@@ -681,22 +687,26 @@ function checkColl(obj1, obj2) {
 	return obj1.userData.obb.intersectsOBB(obj2.userData.obb);
 }
 
-function collide(wall, car, carHb, ws) {
+function collidePl(wall, car, carHb, ws) {
 	if(checkColl(wall, carHb)) {
 		car.rotation.y = wall.rotation.y + Math.PI;
 		yRot = wall.rotation.y;
 		car.position.x = car.position.x + ws * 10 * Math.cos(wall.rotation.y);
 		car.position.z = car.position.z - ws * 10 * Math.sin(wall.rotation.y);
+		health -= 20;
 	}
 
 }
 
-function collect(can, canHb, carHb) {
-	if(checkColl(canHb, carHb)) {
-		can.visible = false;
-		fuel = 50;
-	}
-}
+var text = document.createElement('div');
+text.style.position = 'absolute';
+text.style.width = 100;
+text.style.height = 100;
+text.style.color = "blue";
+text.style.fontSize = 30 + 'px';
+text.style.top = 16 + 'px';
+text.style.left = (window.innerWidth - 516) + 'px';
+document.body.appendChild(text);
 
 function winResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
@@ -721,7 +731,7 @@ var load = 0;
 function animate() {
 	requestAnimationFrame( animate );
 
-	if(start == 1) {
+	if(start == 1 && end == 0) {
 		deltaTime = clock.getDelta();
 
 		carMove(car);
@@ -731,19 +741,64 @@ function animate() {
 		}
 
 		if(load != 0) {
-			console.log(fuel);
 			for(let i = 0; i < lWalls.children.length; i++) {
-				collide(lWalls.children[i], car, carHb, 1);
+				collidePl(lWalls.children[i], car, carHb, 1);
 			}
 
 			for(let i = 0; i < rWalls.children.length; i++) {
-				collide(rWalls.children[i], car, carHb, -1);
+				collidePl(rWalls.children[i], car, carHb, -1);
+			}
+			if(health <= 0) {
+				health = 0;
+				end = 1;
 			}
 
 			for(let i = 0; i < fCans.children.length; i += 2) {
-				collect(fCans.children[i], fCans.children[i+1], carHb);
+				if(checkColl(fCans.children[i+1], carHb) && fCans.children[i].visible) {
+					nfCan = i / 2 + 1;
+					if(nfCan > 4) {
+						nfCan = 0;
+					}
+					fCans.children[i].visible = false;
+					fuel = 50;
+
+					console.log(dsCan);
+					if(dsCan == 0) {
+						fCans.children[dsCan].position.x = Math.random() * 25 - 12.5;
+						fCans.children[dsCan + 1].position.x = fCans.children[dsCan].position.x;
+					}
+					if(dsCan == 2 || dsCan == 4) {
+						fCans.children[dsCan].position.z = Math.random() * 25 - 167.5;
+						fCans.children[dsCan + 1].position.z = fCans.children[dsCan].position.z;
+					}
+					if(dsCan == 6) {
+						fCans.children[dsCan].position.x = Math.random() * 25 - 300;
+						fCans.children[dsCan + 1].position.x = fCans.children[dsCan].position.x;
+					}
+					if(dsCan == 8) {
+						fCans.children[dsCan].position.z = Math.random() * 25 + 121;
+						fCans.children[dsCan + 1].position.z = fCans.children[dsCan].position.z;
+					}
+					if(dsCan != -1) {
+						fCans.children[dsCan].visible = true;
+					}
+					dsCan = i;
+				}
+			}
+
+			if(checkColl(checkPoints.children[carCP], carHb)) {
+				carCP++;
+			}
+
+			if(carCP == 11) {
+				carCP = 0;
+				carLap++;
 			}
 		}
+		const dx = car.position.x - fCans.children[2 * nfCan].position.x;
+		const dz = car.position.z - fCans.children[2 * nfCan].position.z;
+		fCanDis = Math.floor(Math.sqrt(dx * dx + dz * dz) / 5);
+		text.innerHTML = "Health: " + health + "<br> Fuel: " + Math.floor(fuel) + "<br> Next Can: " + fCanDis + "<br> Lap: " + carLap;
 
 		renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
 		renderer.render( scene, camera );
@@ -760,6 +815,11 @@ function animate() {
 		load = 1;
 	}
 	else if (start == 0) {
+		renderer.render(startScene, stCamera);
+	}
+	else {
+		text.innerHTML = "";
+		renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
 		renderer.render(startScene, stCamera);
 	}
 };
